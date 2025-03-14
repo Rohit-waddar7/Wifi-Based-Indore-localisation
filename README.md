@@ -63,30 +63,7 @@ This project implements a basic indoor positioning system using RSSI (Received S
 3. If all APs are detected, the position is estimated using a weighted RSSI approach.
 4. The estimated position is displayed in the Serial Monitor.
 
-## Troubleshooting
-- **WiFi not connecting?**
-  - Check if the SSID and password are correct.
-  - Ensure the ESP32 is within range of the router.
 
-- **Access Points not detected?**
-  - Ensure AP names are correctly entered.
-  - Check if the APs are within range.
-  - Verify that the WiFi network is operational.
 
-- **Position estimation not working?**
-  - Ensure all APs are detected.
-  - Adjust the distance estimation formula if necessary.
 
-## License
-This project is open-source and available under the MIT License.
-
-## Author
-Developed by [Your Name]
-
-## Contributing
-Pull requests are welcome! Feel free to submit any improvements or bug fixes.
-
-## Acknowledgments
-- WiFi RSSI-based positioning research
-- ESP32 documentation
 
