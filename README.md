@@ -7,6 +7,7 @@ This project implements a basic indoor positioning system using RSSI (Received S
 - Scans for predefined access points and measures their RSSI values.
 - Estimates the position of the device using a simple weighted RSSI-based approach.
 - Outputs the estimated position to the Serial Monitor.
+- ESP32 sends data serially to Qcar, and further commands will be given to the Qcar based on RSSI values and access points.
 
 ## Hardware Requirements
 - ESP32 Development Board
@@ -62,8 +63,4 @@ This project implements a basic indoor positioning system using RSSI (Received S
 2. It scans for the predefined APs and collects their RSSI values.
 3. If all APs are detected, the position is estimated using a weighted RSSI approach.
 4. The estimated position is displayed in the Serial Monitor.
-
-
-
-
 
