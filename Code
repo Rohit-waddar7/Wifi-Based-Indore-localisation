@@ -1,0 +1,103 @@
+#include <WiFi.h>
+
+const char* ssid = "abcd";             // Replace with your Wi-Fi SSID
+const char* password = "victus@123";     // Replace with your Wi-Fi Password
+
+// Access Point SSIDs
+const char* ap1 = "TESLA";     // Replace with your AP1's SSID
+const char* ap2 = "abcd";       // Replace with your AP2's SSID
+const char* ap3 = "victus";    // Replace with your AP3's SSID
+const char* ap4 = "TesLa";      // Replace with your AP4's SSID
+
+// Coordinates of the Access Points (in meters)
+float ap1_coords[2] = {0.0, 1.0};
+float ap2_coords[2] = {0.0, 0.0};
+float ap3_coords[2] = {1.0, 0.0};
+float ap4_coords[2] = {1.0, 1.0}; // Coordinates for AP4
+
+void setup() {
+    Serial.begin(115200);
+    WiFi.begin(ssid, password);
+    
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.println("Connecting to WiFi...");
+    }
+    Serial.println("Connected to WiFi");
+}
+
+void loop() {
+    // Get RSSI values for only the specified access points
+    int rssi1 = getRSSI(ap1);
+    int rssi2 = getRSSI(ap2);
+    int rssi3 = getRSSI(ap3);
+    int rssi4 = getRSSI(ap4);
+
+    // Check each AP connection and output individual error messages if any are missing
+    bool allAPsDetected = true;
+    if (rssi1 == -999) {
+        Serial.println("AP1 (victus) not detected.");
+        allAPsDetected = false;
+    }
+    if (rssi2 == -999) {
+        Serial.println("AP2 (abcd) not detected.");
+        allAPsDetected = false;
+    }
+    if (rssi3 == -999) {
+        Serial.println("AP3 (realme7) not detected.");
+        allAPsDetected = false;
+    }
+    if (rssi4 == -999) {
+        Serial.println("AP4 (TesLa) not detected.");
+        allAPsDetected = false;
+    }
+
+    // Proceed with position estimation only if all APs are detected
+    if (allAPsDetected) {
+        float* estimated_position = estimatePositionUsingRSSI(rssi1, rssi2, rssi3, rssi4);
+        Serial.print("Estimated Position: (");
+        Serial.print(estimated_position[0]);
+        Serial.print(", ");
+        Serial.print(estimated_position[1]);
+        Serial.println(")");
+    } else {
+        Serial.println("Unable to estimate position. One or more APs not detected.");
+    }
+    
+    delay(1000); // Wait before the next measurement
+}
+
+// Function to get RSSI from only the specified APs
+int getRSSI(const char* targetSSID) {
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; ++i) {
+        if (WiFi.SSID(i) == targetSSID) {
+            return WiFi.RSSI(i);
+        }
+    }
+    return -999;  // Return -999 if the specified AP is not found
+}
+
+// Function to estimate position using weighted RSSI values
+float* estimatePositionUsingRSSI(int rssi1, int rssi2, int rssi3, int rssi4) {
+    static float position[2];
+
+    // Convert RSSI to distance (simple path loss model, adjust values as needed)
+    float dist1 = pow(10, (abs(rssi1) - 30) / 20.0);
+    float dist2 = pow(10, (abs(rssi2) - 30) / 20.0);
+    float dist3 = pow(10, (abs(rssi3) - 30) / 20.0);
+    float dist4 = pow(10, (abs(rssi4) - 30) / 20.0);
+
+    // Calculate weights based on distances (closer AP has higher weight)
+    float weight1 = 1 / dist1;
+    float weight2 = 1 / dist2;
+    float weight3 = 1 / dist3;
+    float weight4 = 1 / dist4;
+    float sum_weights = weight1 + weight2 + weight3 + weight4;
+
+    // Weighted average position
+    position[0] = (weight1 * ap1_coords[0] + weight2 * ap2_coords[0] + weight3 * ap3_coords[0] + weight4 * ap4_coords[0]) / sum_weights;
+    position[1] = (weight1 * ap1_coords[1] + weight2 * ap2_coords[1] + weight3 * ap3_coords[1] + weight4 * ap4_coords[1]) / sum_weights;
+
+    return position;
+}
